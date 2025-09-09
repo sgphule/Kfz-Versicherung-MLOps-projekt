@@ -27,3 +27,12 @@ categorical_columns:
   - Gender
   - Vehicle_Age
   - Vehicle_Damage
+
+drop_columns: _id
+
+num_features:
+  - Age
+  - Vintage
+
+mm_columns:
+  - Annual_Premium
