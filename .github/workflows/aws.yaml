@@ -26,23 +26,18 @@
        - name: Build, tag, and push image to Amazon ECR
          id: build-image
          env:
-           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
            ECR_REPOSITORY: ${{ secrets.ECR_REPO }}
            IMAGE_TAG: ${{ github.sha }}
          run: |
            set -e
            docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .  
            docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+            echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
    Continuous-Deployment:
      needs: Continuous-Integration
      runs-on: self-hosted
-
-     env:
-       ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
-       ECR_REPOSITORY: ${{ secrets.ECR_REPO }}
-       IMAGE_TAG: ${{ github.sha }}
-
      steps:
        - name: Checkout
          uses: actions/checkout@v3
@@ -59,8 +54,6 @@
 
        - name: Run Docker Image to serve users
          run: |
-          IMAGE="$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          echo "Deploying image: $IMAGE"
           docker run -d \
            -e AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" 
            -e AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" 
